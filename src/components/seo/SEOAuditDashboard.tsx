@@ -14,11 +14,48 @@ import {
   BarChart3
 } from 'lucide-react';
 import { AdvancedSEOService } from '../../lib/advancedSEO';
-import { CircularProgressbar, buildStyles } from 'react-circular-progressbar';
 
 interface SEOAuditDashboardProps {
   url: string;
 }
+
+// Simple circular progress component to replace react-circular-progressbar
+const CircularProgress: React.FC<{ value: number; text: string; color: string }> = ({ value, text, color }) => {
+  const radius = 45;
+  const circumference = 2 * Math.PI * radius;
+  const strokeDasharray = circumference;
+  const strokeDashoffset = circumference - (value / 100) * circumference;
+
+  return (
+    <div className="relative w-32 h-32">
+      <svg className="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
+        <circle
+          cx="50"
+          cy="50"
+          r={radius}
+          stroke="#334155"
+          strokeWidth="8"
+          fill="transparent"
+        />
+        <circle
+          cx="50"
+          cy="50"
+          r={radius}
+          stroke={color}
+          strokeWidth="8"
+          fill="transparent"
+          strokeDasharray={strokeDasharray}
+          strokeDashoffset={strokeDashoffset}
+          strokeLinecap="round"
+          className="transition-all duration-1000 ease-out"
+        />
+      </svg>
+      <div className="absolute inset-0 flex items-center justify-center">
+        <span className="text-2xl font-bold text-white">{text}</span>
+      </div>
+    </div>
+  );
+};
 
 export const SEOAuditDashboard: React.FC<SEOAuditDashboardProps> = ({ url }) => {
   const [auditData, setAuditData] = useState<any>(null);
@@ -85,17 +122,11 @@ export const SEOAuditDashboard: React.FC<SEOAuditDashboardProps> = ({ url }) => 
       >
         <h2 className="text-2xl font-bold text-white mb-6">SEO Audit Score</h2>
         <div className="flex items-center justify-center space-x-12">
-          <div className="w-32 h-32">
-            <CircularProgressbar
-              value={auditData.score}
-              text={`${auditData.score}`}
-              styles={buildStyles({
-                textColor: '#fff',
-                pathColor: getScoreColor(auditData.score),
-                trailColor: '#334155'
-              })}
-            />
-          </div>
+          <CircularProgress
+            value={auditData.score}
+            text={`${auditData.score}`}
+            color={getScoreColor(auditData.score)}
+          />
           <div className="text-left">
             <div className="space-y-3">
               <div className="flex items-center space-x-3">

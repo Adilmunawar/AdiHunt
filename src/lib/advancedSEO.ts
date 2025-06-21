@@ -17,6 +17,14 @@ interface SEOIssue {
   priority: number;
 }
 
+interface SEORecommendation {
+  title: string;
+  description: string;
+  impact: string;
+  effort: string;
+  category: string;
+}
+
 interface TechnicalSEOAnalysis {
   coreWebVitals: {
     lcp: number;
@@ -41,6 +49,23 @@ interface TechnicalSEOAnalysis {
     mixedContent: boolean;
     securityHeaders: string[];
   };
+}
+
+interface ContentAnalysis {
+  wordCount: number;
+  readabilityScore: number;
+  keywordDensity: { [key: string]: number };
+  headingStructure: { h1: number; h2: number; h3: number; h4: number };
+  internalLinks: number;
+  externalLinks: number;
+}
+
+interface CompetitorGap {
+  keyword: string;
+  competitorRank: number;
+  yourRank: number;
+  opportunity: string;
+  difficulty: number;
 }
 
 export class AdvancedSEOService {
