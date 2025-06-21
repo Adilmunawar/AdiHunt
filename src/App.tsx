@@ -8,6 +8,9 @@ import { Analytics } from './pages/Analytics';
 import { Optimizer } from './pages/Optimizer';
 import { Team } from './pages/Team';
 import { AuthPage } from './pages/Auth';
+import { SEOAudit } from './pages/SEOAudit';
+import { ContentPlanning } from './pages/ContentPlanning';
+import { CompetitorIntelligence } from './pages/CompetitorIntelligence';
 import { useAuthStore } from './store/authStore';
 
 function App() {
@@ -53,6 +56,9 @@ function App() {
           <Route path="/trends" element={<div className="text-white">Trends Page - Coming Soon</div>} />
           <Route path="/optimizer" element={<Optimizer />} />
           <Route path="/analytics" element={<Analytics />} />
+          <Route path="/seo-audit" element={<SEOAudit />} />
+          <Route path="/content-planning" element={<ContentPlanning />} />
+          <Route path="/competitor-intelligence" element={<CompetitorIntelligence />} />
           <Route path="/projects" element={<div className="text-white">Projects Page - Coming Soon</div>} />
           <Route path="/team" element={<Team />} />
           <Route path="/settings" element={<div className="text-white">Settings Page - Coming Soon</div>} />

@@ -11,7 +11,10 @@ import {
   Zap,
   Brain,
   Users,
-  BarChart3
+  BarChart3,
+  Shield,
+  Calendar,
+  Eye
 } from 'lucide-react';
 
 const navigation = [
@@ -20,6 +23,9 @@ const navigation = [
   { name: 'Trends', href: '/trends', icon: TrendingUp },
   { name: 'Optimizer', href: '/optimizer', icon: Target },
   { name: 'Analytics', href: '/analytics', icon: BarChart3 },
+  { name: 'SEO Audit', href: '/seo-audit', icon: Shield },
+  { name: 'Content Planning', href: '/content-planning', icon: Calendar },
+  { name: 'Competitor Intel', href: '/competitor-intelligence', icon: Eye },
   { name: 'Projects', href: '/projects', icon: FolderOpen },
   { name: 'Team', href: '/team', icon: Users },
   { name: 'Settings', href: '/settings', icon: Settings },
@@ -55,7 +61,7 @@ export const Sidebar: React.FC = () => {
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 p-4 space-y-2">
+      <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
         {navigation.map((item) => {
           const isActive = location.pathname === item.href;
           return (
