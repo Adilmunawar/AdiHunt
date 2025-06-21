@@ -11,19 +11,20 @@
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.39.3",
+    "@types/node": "^24.0.3",
+    "date-fns": "^2.30.0",
     "framer-motion": "^10.16.16",
     "lucide-react": "^0.344.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
-    "react-router-dom": "^6.20.1",
-    "recharts": "^2.8.0",
     "react-hot-toast": "^2.4.1",
-    "zustand": "^4.4.7",
-    "date-fns": "^2.30.0",
     "react-markdown": "^9.0.1",
-    "remark-gfm": "^4.0.0",
+    "react-router-dom": "^6.20.1",
+    "react-syntax-highlighter": "^15.5.0",
+    "recharts": "^2.8.0",
     "rehype-highlight": "^7.0.0",
-    "react-syntax-highlighter": "^15.5.0"
+    "remark-gfm": "^4.0.0",
+    "zustand": "^4.4.7"
   },
   "devDependencies": {
     "@eslint/js": "^9.9.1",

@@ -10,7 +10,8 @@ import {
   Settings,
   Zap,
   Brain,
-  Users
+  Users,
+  BarChart3
 } from 'lucide-react';
 
 const navigation = [
@@ -18,6 +19,7 @@ const navigation = [
   { name: 'Generate', href: '/generate', icon: PenTool },
   { name: 'Trends', href: '/trends', icon: TrendingUp },
   { name: 'Optimizer', href: '/optimizer', icon: Target },
+  { name: 'Analytics', href: '/analytics', icon: BarChart3 },
   { name: 'Projects', href: '/projects', icon: FolderOpen },
   { name: 'Team', href: '/team', icon: Users },
   { name: 'Settings', href: '/settings', icon: Settings },

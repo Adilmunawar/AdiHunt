@@ -4,6 +4,9 @@ import { Toaster } from 'react-hot-toast';
 import { Layout } from './components/ui/Layout';
 import { Dashboard } from './pages/Dashboard';
 import { Generator } from './pages/Generator';
+import { Analytics } from './pages/Analytics';
+import { Optimizer } from './pages/Optimizer';
+import { Team } from './pages/Team';
 import { AuthPage } from './pages/Auth';
 import { useAuthStore } from './store/authStore';
 
@@ -48,9 +51,10 @@ function App() {
           <Route path="/" element={<Dashboard />} />
           <Route path="/generate" element={<Generator />} />
           <Route path="/trends" element={<div className="text-white">Trends Page - Coming Soon</div>} />
-          <Route path="/optimizer" element={<div className="text-white">Optimizer Page - Coming Soon</div>} />
+          <Route path="/optimizer" element={<Optimizer />} />
+          <Route path="/analytics" element={<Analytics />} />
           <Route path="/projects" element={<div className="text-white">Projects Page - Coming Soon</div>} />
-          <Route path="/team" element={<div className="text-white">Team Page - Coming Soon</div>} />
+          <Route path="/team" element={<Team />} />
           <Route path="/settings" element={<div className="text-white">Settings Page - Coming Soon</div>} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
