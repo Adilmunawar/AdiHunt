@@ -16,6 +16,8 @@ interface ContentGenerationRequest {
   wordCount: number;
   targetKeywords: string[];
   audience: string;
+  researchDepth?: 'basic' | 'comprehensive' | 'expert';
+  seoTarget?: number;
 }
 
 interface GeneratedContent {
@@ -94,6 +96,12 @@ export class GeminiService {
     return this.parseContentResponse(response);
   }
 
+  static async generateAdvancedContent(request: ContentGenerationRequest): Promise<GeneratedContent> {
+    const prompt = this.buildAdvancedContentPrompt(request);
+    const response = await this.makeRequest(prompt);
+    return this.parseContentResponse(response);
+  }
+
   static async generateSEOBrief(topic: string, targetKeywords: string[]): Promise<any> {
     const prompt = `
     Create a comprehensive SEO content brief for the topic: "${topic}"
@@ -141,6 +149,67 @@ export class GeminiService {
     } catch {
       return { seoScore: 0, error: 'Failed to analyze content' };
     }
+  }
+
+  private static buildAdvancedContentPrompt(request: ContentGenerationRequest): string {
+    return `
+    You are AdiHunt, the world's most advanced AI SEO content generator. Create expert-level, EEAT-optimized content that ranks #1 on Google.
+
+    CONTENT REQUIREMENTS:
+    - Topic: ${request.topic}
+    - Target SEO Score: ${request.seoTarget || 90}+
+    - Research Depth: ${request.researchDepth || 'comprehensive'}
+    - Word Count: ${request.wordCount}+
+    - Target Audience: ${request.audience}
+
+    ADVANCED AI RESEARCH PROCESS:
+    1. KEYWORD RESEARCH: Identify trending keywords, long-tail variations, and semantic keywords
+    2. COMPETITOR ANALYSIS: Analyze top-ranking content gaps and opportunities
+    3. EXPERT SOURCES: Include authoritative references and expert insights
+    4. TREND ANALYSIS: Incorporate current industry trends and data
+    5. CONTENT STRUCTURE: Create optimal heading hierarchy and content flow
+    6. SEO OPTIMIZATION: Implement advanced on-page SEO techniques
+
+    GENERATE A JSON RESPONSE WITH:
+    {
+      "title": "SEO-optimized title (60-70 characters)",
+      "metaDescription": "Compelling meta description (150-160 characters)",
+      "content": "Full HTML article with proper headings, paragraphs, lists, and semantic structure",
+      "keywords": ["primary", "secondary", "LSI keywords"],
+      "internalLinks": ["suggested internal link anchor texts"],
+      "schemaMarkup": {
+        "@context": "https://schema.org",
+        "@type": "Article",
+        "headline": "title",
+        "author": { "@type": "Person", "name": "Expert Author" },
+        "datePublished": "current date",
+        "description": "meta description"
+      },
+      "seoScore": 92
+    }
+
+    CRITICAL REQUIREMENTS:
+    - Use EEAT principles (Experience, Expertise, Authoritativeness, Trustworthiness)
+    - Include expert quotes and citations
+    - Add FAQ section with schema markup
+    - Optimize for voice search with natural language
+    - Include semantic keywords and entities
+    - Structure with proper H1-H6 hierarchy
+    - Add internal linking opportunities
+    - Include compelling CTAs
+    - Ensure mobile-first readability
+    - Target featured snippets with concise answers
+    - Achieve ${request.seoTarget || 90}+ SEO score
+
+    CONTENT DEPTH REQUIREMENTS:
+    - Comprehensive coverage of the topic
+    - Multiple expert perspectives
+    - Data-driven insights and statistics
+    - Actionable advice and implementation steps
+    - Real-world examples and case studies
+    - Future trends and predictions
+    - Common challenges and solutions
+    `;
   }
 
   private static buildContentPrompt(request: ContentGenerationRequest): string {
@@ -206,7 +275,7 @@ export class GeminiService {
       keywords: this.extractKeywords(response),
       internalLinks: this.extractInternalLinks(response),
       schemaMarkup: {},
-      seoScore: 75
+      seoScore: 85
     };
   }
 

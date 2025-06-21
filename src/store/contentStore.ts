@@ -48,6 +48,7 @@ interface ContentState {
   deleteArticle: (id: string) => Promise<void>;
   
   generateContent: (request: any) => Promise<Article>;
+  generateAdvancedContent: (request: any) => Promise<Article>;
   optimizeContent: (articleId: string) => Promise<void>;
   
   loadTrends: (industry?: string) => Promise<void>;
@@ -223,6 +224,45 @@ export const useContentStore = create<ContentState>((set, get) => ({
       return article;
     } catch (error) {
       console.error('Error generating content:', error);
+      throw error;
+    } finally {
+      set({ loading: false });
+    }
+  },
+
+  generateAdvancedContent: async (request: any) => {
+    set({ loading: true });
+    try {
+      // Enhanced content generation with deep research
+      const enhancedRequest = {
+        topic: request.title,
+        tone: 'professional',
+        format: 'blog',
+        language: 'English',
+        wordCount: 3000,
+        targetKeywords: [], // Will be researched automatically
+        audience: 'professionals',
+        researchDepth: request.researchDepth || 'comprehensive',
+        seoTarget: request.seoTarget || 90
+      };
+
+      const generatedContent = await GeminiService.generateAdvancedContent(enhancedRequest);
+      
+      // Create article in database
+      const article = await get().createArticle(request.projectId, {
+        title: generatedContent.title,
+        meta_description: generatedContent.metaDescription,
+        content: generatedContent.content,
+        seo_score: generatedContent.seoScore,
+        word_count: generatedContent.content.split(' ').length,
+        target_keywords: generatedContent.keywords,
+        status: 'ready',
+        schema_markup: generatedContent.schemaMarkup,
+      });
+      
+      return article;
+    } catch (error) {
+      console.error('Error generating advanced content:', error);
       throw error;
     } finally {
       set({ loading: false });
