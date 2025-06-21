@@ -15,7 +15,8 @@ import {
   Eye,
   Globe,
   Users,
-  Lightbulb
+  Lightbulb,
+  FolderOpen
 } from 'lucide-react';
 import { useContentStore } from '../store/contentStore';
 import { toast } from 'react-hot-toast';

@@ -1,7 +1,7 @@
 import { createClient } from '@supabase/supabase-js';
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'YOUR_SUPABASE_URL';
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || 'YOUR_SUPABASE_ANON_KEY';
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://placeholder.supabase.co';
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || 'placeholder-key';
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
@@ -78,7 +78,6 @@ export type Database = {
           updated_at: string;
           trend_data: any | null;
           schema_markup: any | null;
-          internal_links: string[] | null;
         };
         Insert: {
           project_id: string;
@@ -92,7 +91,6 @@ export type Database = {
           status?: 'draft' | 'optimizing' | 'ready' | 'published';
           trend_data?: any | null;
           schema_markup?: any | null;
-          internal_links?: string[] | null;
         };
         Update: {
           title?: string;
@@ -104,7 +102,6 @@ export type Database = {
           status?: 'draft' | 'optimizing' | 'ready' | 'published';
           trend_data?: any | null;
           schema_markup?: any | null;
-          internal_links?: string[] | null;
         };
       };
     };

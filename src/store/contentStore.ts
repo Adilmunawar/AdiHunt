@@ -77,58 +77,78 @@ export const useContentStore = create<ContentState>((set, get) => ({
       set({ projects: data || [] });
     } catch (error) {
       console.error('Error loading projects:', error);
+      // Set empty array on error to prevent app crash
+      set({ projects: [] });
     } finally {
       set({ loading: false });
     }
   },
 
   createProject: async (name: string, description?: string, color = '#3b82f6') => {
-    const { data, error } = await supabase
-      .from('projects')
-      .insert({
-        name,
-        description,
-        color,
-        user_id: (await supabase.auth.getUser()).data.user?.id!,
-      })
-      .select()
-      .single();
+    try {
+      const { data: user } = await supabase.auth.getUser();
+      if (!user.user) throw new Error('Not authenticated');
 
-    if (error) throw error;
-    
-    set(state => ({
-      projects: [data, ...state.projects]
-    }));
-    
-    return data;
+      const { data, error } = await supabase
+        .from('projects')
+        .insert({
+          name,
+          description,
+          color,
+          user_id: user.user.id,
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+      
+      set(state => ({
+        projects: [data, ...state.projects]
+      }));
+      
+      return data;
+    } catch (error) {
+      console.error('Error creating project:', error);
+      throw error;
+    }
   },
 
   updateProject: async (id: string, updates: Partial<Project>) => {
-    const { data, error } = await supabase
-      .from('projects')
-      .update(updates)
-      .eq('id', id)
-      .select()
-      .single();
+    try {
+      const { data, error } = await supabase
+        .from('projects')
+        .update(updates)
+        .eq('id', id)
+        .select()
+        .single();
 
-    if (error) throw error;
-    
-    set(state => ({
-      projects: state.projects.map(p => p.id === id ? data : p)
-    }));
+      if (error) throw error;
+      
+      set(state => ({
+        projects: state.projects.map(p => p.id === id ? data : p)
+      }));
+    } catch (error) {
+      console.error('Error updating project:', error);
+      throw error;
+    }
   },
 
   deleteProject: async (id: string) => {
-    const { error } = await supabase
-      .from('projects')
-      .delete()
-      .eq('id', id);
+    try {
+      const { error } = await supabase
+        .from('projects')
+        .delete()
+        .eq('id', id);
 
-    if (error) throw error;
-    
-    set(state => ({
-      projects: state.projects.filter(p => p.id !== id)
-    }));
+      if (error) throw error;
+      
+      set(state => ({
+        projects: state.projects.filter(p => p.id !== id)
+      }));
+    } catch (error) {
+      console.error('Error deleting project:', error);
+      throw error;
+    }
   },
 
   loadArticles: async (projectId?: string) => {
@@ -146,61 +166,77 @@ export const useContentStore = create<ContentState>((set, get) => ({
       set({ articles: data || [] });
     } catch (error) {
       console.error('Error loading articles:', error);
+      set({ articles: [] });
     } finally {
       set({ loading: false });
     }
   },
 
   createArticle: async (projectId: string, data: any) => {
-    const user = (await supabase.auth.getUser()).data.user;
-    if (!user) throw new Error('User not authenticated');
-    
-    const { data: article, error } = await supabase
-      .from('articles')
-      .insert({
-        project_id: projectId,
-        user_id: user.id,
-        ...data,
-      })
-      .select()
-      .single();
+    try {
+      const user = (await supabase.auth.getUser()).data.user;
+      if (!user) throw new Error('User not authenticated');
+      
+      const { data: article, error } = await supabase
+        .from('articles')
+        .insert({
+          project_id: projectId,
+          user_id: user.id,
+          ...data,
+        })
+        .select()
+        .single();
 
-    if (error) throw error;
-    
-    set(state => ({
-      articles: [article, ...state.articles]
-    }));
-    
-    return article;
+      if (error) throw error;
+      
+      set(state => ({
+        articles: [article, ...state.articles]
+      }));
+      
+      return article;
+    } catch (error) {
+      console.error('Error creating article:', error);
+      throw error;
+    }
   },
 
   updateArticle: async (id: string, updates: Partial<Article>) => {
-    const { data, error } = await supabase
-      .from('articles')
-      .update({ ...updates, updated_at: new Date().toISOString() })
-      .eq('id', id)
-      .select()
-      .single();
+    try {
+      const { data, error } = await supabase
+        .from('articles')
+        .update({ ...updates, updated_at: new Date().toISOString() })
+        .eq('id', id)
+        .select()
+        .single();
 
-    if (error) throw error;
-    
-    set(state => ({
-      articles: state.articles.map(a => a.id === id ? data : a),
-      currentArticle: state.currentArticle?.id === id ? data : state.currentArticle
-    }));
+      if (error) throw error;
+      
+      set(state => ({
+        articles: state.articles.map(a => a.id === id ? data : a),
+        currentArticle: state.currentArticle?.id === id ? data : state.currentArticle
+      }));
+    } catch (error) {
+      console.error('Error updating article:', error);
+      throw error;
+    }
   },
 
   deleteArticle: async (id: string) => {
-    const { error } = await supabase
-      .from('articles')
-      .delete()
-      .eq('id', id);
+    try {
+      const { error } = await supabase
+        .from('articles')
+        .delete()
+        .eq('id', id);
 
-    if (error) throw error;
-    
-    set(state => ({
-      articles: state.articles.filter(a => a.id !== id)
-    }));
+      if (error) throw error;
+      
+      set(state => ({
+        articles: state.articles.filter(a => a.id !== id)
+      }));
+    } catch (error) {
+      console.error('Error deleting article:', error);
+      throw error;
+    }
   },
 
   generateContent: async (request: any) => {
@@ -270,11 +306,11 @@ export const useContentStore = create<ContentState>((set, get) => ({
   },
 
   optimizeContent: async (articleId: string) => {
-    const article = get().articles.find(a => a.id === articleId);
-    if (!article) return;
-
-    set({ loading: true });
     try {
+      const article = get().articles.find(a => a.id === articleId);
+      if (!article) return;
+
+      set({ loading: true });
       const optimization = await GeminiService.optimizeContent(
         article.content,
         article.target_keywords
@@ -298,6 +334,7 @@ export const useContentStore = create<ContentState>((set, get) => ({
       set({ trends });
     } catch (error) {
       console.error('Error loading trends:', error);
+      set({ trends: [] });
     } finally {
       set({ loading: false });
     }

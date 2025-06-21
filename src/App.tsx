@@ -8,13 +8,29 @@ import { Analytics } from './pages/Analytics';
 import { Optimizer } from './pages/Optimizer';
 import { Team } from './pages/Team';
 import { AuthPage } from './pages/Auth';
-import { SEOAudit } from './pages/SEOAudit';
-import { ContentPlanning } from './pages/ContentPlanning';
-import { CompetitorIntelligence } from './pages/CompetitorIntelligence';
 import { useAuthStore } from './store/authStore';
 
 function App() {
   const { user, loading } = useAuthStore();
+
+  // Error boundary for the app
+  useEffect(() => {
+    const handleError = (error: ErrorEvent) => {
+      console.error('Global error:', error);
+    };
+
+    const handleUnhandledRejection = (event: PromiseRejectionEvent) => {
+      console.error('Unhandled promise rejection:', event.reason);
+    };
+
+    window.addEventListener('error', handleError);
+    window.addEventListener('unhandledrejection', handleUnhandledRejection);
+
+    return () => {
+      window.removeEventListener('error', handleError);
+      window.removeEventListener('unhandledrejection', handleUnhandledRejection);
+    };
+  }, []);
 
   if (loading) {
     return (
@@ -56,9 +72,6 @@ function App() {
           <Route path="/trends" element={<div className="text-white">Trends Page - Coming Soon</div>} />
           <Route path="/optimizer" element={<Optimizer />} />
           <Route path="/analytics" element={<Analytics />} />
-          <Route path="/seo-audit" element={<SEOAudit />} />
-          <Route path="/content-planning" element={<ContentPlanning />} />
-          <Route path="/competitor-intelligence" element={<CompetitorIntelligence />} />
           <Route path="/projects" element={<div className="text-white">Projects Page - Coming Soon</div>} />
           <Route path="/team" element={<Team />} />
           <Route path="/settings" element={<div className="text-white">Settings Page - Coming Soon</div>} />
