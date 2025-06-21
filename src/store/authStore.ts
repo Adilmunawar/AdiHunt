@@ -1,24 +1,50 @@
 import { create } from 'zustand';
-import { supabase } from '../lib/supabase';
+import { supabase, isDemoMode } from '../lib/supabase';
 import type { User } from '@supabase/supabase-js';
 
 interface AuthState {
   user: User | null;
   profile: any | null;
   loading: boolean;
+  demoMode: boolean;
   signIn: (email: string, password: string) => Promise<void>;
   signUp: (email: string, password: string, fullName: string) => Promise<void>;
   signOut: () => Promise<void>;
   loadProfile: () => Promise<void>;
   updateProfile: (updates: any) => Promise<void>;
+  enableDemoMode: () => void;
 }
 
 export const useAuthStore = create<AuthState>((set, get) => ({
   user: null,
   profile: null,
   loading: true,
+  demoMode: isDemoMode,
 
   signIn: async (email: string, password: string) => {
+    if (isDemoMode) {
+      // Demo mode - simulate successful login
+      const demoUser = {
+        id: 'demo-user-id',
+        email: email,
+        user_metadata: { full_name: 'Demo User' }
+      } as User;
+      
+      set({ 
+        user: demoUser,
+        profile: {
+          id: 'demo-user-id',
+          email: email,
+          full_name: 'Demo User',
+          subscription_tier: 'pro',
+          usage_count: 5,
+          usage_limit: 100,
+          api_credits: 500
+        }
+      });
+      return;
+    }
+
     try {
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
@@ -36,6 +62,29 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   },
 
   signUp: async (email: string, password: string, fullName: string) => {
+    if (isDemoMode) {
+      // Demo mode - simulate successful signup
+      const demoUser = {
+        id: 'demo-user-id',
+        email: email,
+        user_metadata: { full_name: fullName }
+      } as User;
+      
+      set({ 
+        user: demoUser,
+        profile: {
+          id: 'demo-user-id',
+          email: email,
+          full_name: fullName,
+          subscription_tier: 'free',
+          usage_count: 0,
+          usage_limit: 10,
+          api_credits: 100
+        }
+      });
+      return;
+    }
+
     try {
       const { data, error } = await supabase.auth.signUp({
         email,
@@ -56,6 +105,11 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   },
 
   signOut: async () => {
+    if (isDemoMode) {
+      set({ user: null, profile: null });
+      return;
+    }
+
     try {
       await supabase.auth.signOut();
       set({ user: null, profile: null });
@@ -65,6 +119,8 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   },
 
   loadProfile: async () => {
+    if (isDemoMode) return;
+
     try {
       const user = get().user;
       if (!user) return;
@@ -89,6 +145,9 @@ export const useAuthStore = create<AuthState>((set, get) => ({
           subscription_tier: 'free' as const,
           usage_count: 0,
           usage_limit: 10,
+          api_credits: 100,
+          preferences: {},
+          onboarding_completed: false
         };
 
         const { data: createdProfile, error: createError } = await supabase
@@ -112,6 +171,11 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   },
 
   updateProfile: async (updates: any) => {
+    if (isDemoMode) {
+      set(state => ({ profile: { ...state.profile, ...updates } }));
+      return;
+    }
+
     try {
       const user = get().user;
       if (!user) return;
@@ -130,19 +194,44 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       throw error;
     }
   },
+
+  enableDemoMode: () => {
+    set({ 
+      demoMode: true,
+      user: {
+        id: 'demo-user-id',
+        email: 'demo@adihunt.com',
+        user_metadata: { full_name: 'Demo User' }
+      } as User,
+      profile: {
+        id: 'demo-user-id',
+        email: 'demo@adihunt.com',
+        full_name: 'Demo User',
+        subscription_tier: 'pro',
+        usage_count: 5,
+        usage_limit: 100,
+        api_credits: 500
+      }
+    });
+  }
 }));
 
 // Initialize auth state with error handling
-supabase.auth.onAuthStateChange((event, session) => {
-  try {
-    const { user } = session || {};
-    useAuthStore.setState({ user, loading: false });
-    
-    if (user) {
-      useAuthStore.getState().loadProfile();
+if (!isDemoMode) {
+  supabase.auth.onAuthStateChange((event, session) => {
+    try {
+      const { user } = session || {};
+      useAuthStore.setState({ user, loading: false });
+      
+      if (user) {
+        useAuthStore.getState().loadProfile();
+      }
+    } catch (error) {
+      console.error('Auth state change error:', error);
+      useAuthStore.setState({ loading: false });
     }
-  } catch (error) {
-    console.error('Auth state change error:', error);
-    useAuthStore.setState({ loading: false });
-  }
-});
+  });
+} else {
+  // In demo mode, set loading to false immediately
+  useAuthStore.setState({ loading: false });
+}

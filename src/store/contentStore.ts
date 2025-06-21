@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { supabase } from '../lib/supabase';
+import { supabase, isDemoMode } from '../lib/supabase';
 import { GeminiService } from '../lib/gemini';
 import { TrendsService } from '../lib/trends';
 
@@ -57,15 +57,73 @@ interface ContentState {
   setCurrentArticle: (article: Article | null) => void;
 }
 
+// Demo data
+const demoProjects: Project[] = [
+  {
+    id: 'demo-project-1',
+    name: 'Tech Blog',
+    description: 'Technology and AI content',
+    color: '#3b82f6',
+    article_count: 12,
+    created_at: new Date().toISOString()
+  },
+  {
+    id: 'demo-project-2',
+    name: 'Marketing Hub',
+    description: 'Digital marketing strategies',
+    color: '#10b981',
+    article_count: 8,
+    created_at: new Date().toISOString()
+  }
+];
+
+const demoArticles: Article[] = [
+  {
+    id: 'demo-article-1',
+    project_id: 'demo-project-1',
+    title: 'The Future of AI in Content Creation',
+    meta_description: 'Explore how AI is revolutionizing content creation and what it means for creators.',
+    content: '<h1>The Future of AI in Content Creation</h1><p>Artificial Intelligence is transforming how we create content...</p>',
+    seo_score: 92,
+    word_count: 2500,
+    target_keywords: ['AI content creation', 'artificial intelligence', 'content automation'],
+    status: 'published',
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+    trend_data: null,
+    schema_markup: null
+  },
+  {
+    id: 'demo-article-2',
+    project_id: 'demo-project-1',
+    title: 'SEO Best Practices for 2024',
+    meta_description: 'Complete guide to SEO best practices and strategies for 2024.',
+    content: '<h1>SEO Best Practices for 2024</h1><p>Search engine optimization continues to evolve...</p>',
+    seo_score: 88,
+    word_count: 3200,
+    target_keywords: ['SEO 2024', 'search optimization', 'SEO best practices'],
+    status: 'ready',
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+    trend_data: null,
+    schema_markup: null
+  }
+];
+
 export const useContentStore = create<ContentState>((set, get) => ({
-  projects: [],
-  articles: [],
-  currentProject: null,
+  projects: isDemoMode ? demoProjects : [],
+  articles: isDemoMode ? demoArticles : [],
+  currentProject: isDemoMode ? demoProjects[0] : null,
   currentArticle: null,
   loading: false,
   trends: [],
 
   loadProjects: async () => {
+    if (isDemoMode) {
+      set({ projects: demoProjects });
+      return;
+    }
+
     set({ loading: true });
     try {
       const { data, error } = await supabase
@@ -77,7 +135,6 @@ export const useContentStore = create<ContentState>((set, get) => ({
       set({ projects: data || [] });
     } catch (error) {
       console.error('Error loading projects:', error);
-      // Set empty array on error to prevent app crash
       set({ projects: [] });
     } finally {
       set({ loading: false });
@@ -85,6 +142,23 @@ export const useContentStore = create<ContentState>((set, get) => ({
   },
 
   createProject: async (name: string, description?: string, color = '#3b82f6') => {
+    if (isDemoMode) {
+      const newProject: Project = {
+        id: `demo-project-${Date.now()}`,
+        name,
+        description,
+        color,
+        article_count: 0,
+        created_at: new Date().toISOString()
+      };
+      
+      set(state => ({
+        projects: [newProject, ...state.projects]
+      }));
+      
+      return newProject;
+    }
+
     try {
       const { data: user } = await supabase.auth.getUser();
       if (!user.user) throw new Error('Not authenticated');
@@ -114,6 +188,13 @@ export const useContentStore = create<ContentState>((set, get) => ({
   },
 
   updateProject: async (id: string, updates: Partial<Project>) => {
+    if (isDemoMode) {
+      set(state => ({
+        projects: state.projects.map(p => p.id === id ? { ...p, ...updates } : p)
+      }));
+      return;
+    }
+
     try {
       const { data, error } = await supabase
         .from('projects')
@@ -134,6 +215,13 @@ export const useContentStore = create<ContentState>((set, get) => ({
   },
 
   deleteProject: async (id: string) => {
+    if (isDemoMode) {
+      set(state => ({
+        projects: state.projects.filter(p => p.id !== id)
+      }));
+      return;
+    }
+
     try {
       const { error } = await supabase
         .from('projects')
@@ -152,6 +240,14 @@ export const useContentStore = create<ContentState>((set, get) => ({
   },
 
   loadArticles: async (projectId?: string) => {
+    if (isDemoMode) {
+      const filteredArticles = projectId 
+        ? demoArticles.filter(a => a.project_id === projectId)
+        : demoArticles;
+      set({ articles: filteredArticles });
+      return;
+    }
+
     set({ loading: true });
     try {
       let query = supabase.from('articles').select('*');
@@ -173,6 +269,22 @@ export const useContentStore = create<ContentState>((set, get) => ({
   },
 
   createArticle: async (projectId: string, data: any) => {
+    if (isDemoMode) {
+      const newArticle: Article = {
+        id: `demo-article-${Date.now()}`,
+        project_id: projectId,
+        ...data,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      };
+      
+      set(state => ({
+        articles: [newArticle, ...state.articles]
+      }));
+      
+      return newArticle;
+    }
+
     try {
       const user = (await supabase.auth.getUser()).data.user;
       if (!user) throw new Error('User not authenticated');
@@ -182,6 +294,7 @@ export const useContentStore = create<ContentState>((set, get) => ({
         .insert({
           project_id: projectId,
           user_id: user.id,
+          slug: data.title.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, ''),
           ...data,
         })
         .select()
@@ -201,6 +314,14 @@ export const useContentStore = create<ContentState>((set, get) => ({
   },
 
   updateArticle: async (id: string, updates: Partial<Article>) => {
+    if (isDemoMode) {
+      set(state => ({
+        articles: state.articles.map(a => a.id === id ? { ...a, ...updates } : a),
+        currentArticle: state.currentArticle?.id === id ? { ...state.currentArticle, ...updates } : state.currentArticle
+      }));
+      return;
+    }
+
     try {
       const { data, error } = await supabase
         .from('articles')
@@ -222,6 +343,13 @@ export const useContentStore = create<ContentState>((set, get) => ({
   },
 
   deleteArticle: async (id: string) => {
+    if (isDemoMode) {
+      set(state => ({
+        articles: state.articles.filter(a => a.id !== id)
+      }));
+      return;
+    }
+
     try {
       const { error } = await supabase
         .from('articles')

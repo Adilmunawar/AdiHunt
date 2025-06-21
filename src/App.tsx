@@ -8,10 +8,14 @@ import { Analytics } from './pages/Analytics';
 import { Optimizer } from './pages/Optimizer';
 import { Team } from './pages/Team';
 import { AuthPage } from './pages/Auth';
+import { SEOAudit } from './pages/SEOAudit';
+import { ContentPlanning } from './pages/ContentPlanning';
+import { CompetitorIntelligence } from './pages/CompetitorIntelligence';
 import { useAuthStore } from './store/authStore';
+import { isDemoMode } from './lib/supabase';
 
 function App() {
-  const { user, loading } = useAuthStore();
+  const { user, loading, demoMode } = useAuthStore();
 
   // Error boundary for the app
   useEffect(() => {
@@ -40,12 +44,15 @@ function App() {
             <div className="w-8 h-8 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
           </div>
           <p className="text-white text-lg">Loading AdiHunt...</p>
+          {isDemoMode && (
+            <p className="text-neon-blue text-sm mt-2">Demo Mode - No database required</p>
+          )}
         </div>
       </div>
     );
   }
 
-  if (!user) {
+  if (!user && !demoMode) {
     return (
       <>
         <AuthPage />
@@ -72,6 +79,9 @@ function App() {
           <Route path="/trends" element={<div className="text-white">Trends Page - Coming Soon</div>} />
           <Route path="/optimizer" element={<Optimizer />} />
           <Route path="/analytics" element={<Analytics />} />
+          <Route path="/seo-audit" element={<SEOAudit />} />
+          <Route path="/content-planning" element={<ContentPlanning />} />
+          <Route path="/competitor-intelligence" element={<CompetitorIntelligence />} />
           <Route path="/projects" element={<div className="text-white">Projects Page - Coming Soon</div>} />
           <Route path="/team" element={<Team />} />
           <Route path="/settings" element={<div className="text-white">Settings Page - Coming Soon</div>} />

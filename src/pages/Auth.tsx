@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Brain, Mail, Lock, User, Sparkles, TrendingUp, Target, Zap } from 'lucide-react';
+import { Brain, Mail, Lock, User, Sparkles, TrendingUp, Target, Zap, Play } from 'lucide-react';
 import { useAuthStore } from '../store/authStore';
 import { toast } from 'react-hot-toast';
 
@@ -13,7 +13,7 @@ export const AuthPage: React.FC = () => {
     fullName: ''
   });
 
-  const { signIn, signUp } = useAuthStore();
+  const { signIn, signUp, enableDemoMode, demoMode } = useAuthStore();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -32,6 +32,11 @@ export const AuthPage: React.FC = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleDemoMode = () => {
+    enableDemoMode();
+    toast.success('Welcome to AdiHunt Demo!');
   };
 
   const features = [
@@ -146,6 +151,18 @@ export const AuthPage: React.FC = () => {
             </div>
           </div>
 
+          {/* Demo Mode Banner */}
+          {demoMode && (
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="mb-6 p-4 bg-neon-blue/10 border border-neon-blue/30 rounded-xl text-center"
+            >
+              <p className="text-neon-blue font-medium">🚀 Demo Mode Active</p>
+              <p className="text-dark-300 text-sm">Exploring AdiHunt with sample data</p>
+            </motion.div>
+          )}
+
           {/* Form */}
           <div className="bg-dark-800/50 backdrop-blur-xl border border-dark-700/50 rounded-2xl p-8">
             <div className="text-center mb-8">
@@ -158,6 +175,26 @@ export const AuthPage: React.FC = () => {
                   : 'Create your AI-powered content platform'
                 }
               </p>
+            </div>
+
+            {/* Demo Button */}
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={handleDemoMode}
+              className="w-full bg-gradient-to-r from-neon-green to-green-600 text-white font-semibold py-3 rounded-xl hover:shadow-lg hover:shadow-neon-green/30 transition-all duration-200 mb-6 flex items-center justify-center space-x-2"
+            >
+              <Play className="w-5 h-5" />
+              <span>Try Demo (No Signup Required)</span>
+            </motion.button>
+
+            <div className="relative mb-6">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-dark-700"></div>
+              </div>
+              <div className="relative flex justify-center text-sm">
+                <span className="px-2 bg-dark-800 text-dark-400">or continue with email</span>
+              </div>
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-6">
@@ -241,6 +278,13 @@ export const AuthPage: React.FC = () => {
                 }
               </button>
             </div>
+          </div>
+
+          {/* Environment Info */}
+          <div className="mt-6 text-center">
+            <p className="text-dark-400 text-xs">
+              🔧 To connect your own Supabase database, add your credentials to environment variables
+            </p>
           </div>
         </motion.div>
       </div>
